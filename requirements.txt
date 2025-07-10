@@ -1,0 +1,12 @@
+numpy
+pandas
+seaborn
+matplotlib
+scipy
+types
+xarray
+cgrib
+urllib
+requests
+pytz
+geopy
