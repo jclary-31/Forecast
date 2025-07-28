@@ -1,6 +1,7 @@
 Most of today forecast come from deterministic models, where confidence is difficult to estimate. For example, how much a model statement like 'tomorrow temperature in New York at 12h will be 30 Celsius' is correct? 
 Here I use ensemble forecast from ECCC to estimate forecasts on temperature or relative humidity (for example) I estimate confidence interval. The larger the confidence interval, the lower the confidence is. 
 
+![](results/prod/ERCO_Timeserie_Power.jpg)
 
 The following code can either :
 - give forecast for a given location, it needs a location as city, country or it needs a position (lat,lon).
