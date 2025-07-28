@@ -58,9 +58,9 @@ The code procede in the following order :
 - get wind turbine informations
 - if '-market', get wind power generator informations, and add it to the wind turbine informations
 - extract location, wind turbine power, wind turbine across area,... and aggregate informations to represent each wind farm
-- get closest index to the location (this need rework, but it will not be a major improvement)
+- get closest index to the location. This need rework, but it will not be a major improvement
 - get the wind forecast at those indexes for all times, from 0 hour to horizon (horizon need be less than 72 hour)
-- compute wind power by unsing some simple rules (this need, and it will be a major improvement, but required informations as power curve are NOT free)
+- compute wind power by using some simple rules. This need rework, and it will be a major improvement, but most ofrequired informations. For example power curve are NOT free.
 - sum all computed wind power to get the total wind power energy 
 
 # Side note
