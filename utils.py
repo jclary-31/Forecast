@@ -19,23 +19,23 @@ import pytz
 ###########################Location helper###########################
 #####################################################################
 
-def get_location_fromcity(city,country):
-    geolocator = Nominatim(user_agent="my_user_agent")
-    try:
-        loc = geolocator.geocode(city+','+ country)
-    except :
-        print('geolocator not reached! hhtps connection failed')
-        print('reference taken= Montréal')
-        adic=dict()
-        adic['latitude']=45.509
-        adic['longitude']=-73.562
-        loc=types.SimpleNamespace(**adic)   
+# def get_location_fromcity(city,country):
+#     geolocator = Nominatim(user_agent="my_user_agent")
+#     try:
+#         loc = geolocator.geocode(city+','+ country)
+#     except :
+#         print('Geolocator not reached! hhtps connection failed')
+#         print('Reference taken= Montréal')
+#         adic=dict()
+#         adic['latitude']=45.509
+#         adic['longitude']=-73.562
+#         loc=types.SimpleNamespace(**adic)   
 
-    lat=loc.latitude
-    lon=loc.longitude
-    tzone=get_tzone(lat,lon)
+#     lat=loc.latitude
+#     lon=loc.longitude
+#     tzone=get_tzone(lat,lon)
 
-    return [(lat,lon,city+' '+country,tzone)]
+#    return [(lat,lon,city+' '+country,tzone)]
 
 def get_tzone(lat,lon):
     #from timezonefinder import TimezoneFinder ##some bug on wsl
@@ -54,17 +54,17 @@ def get_tzone(lat,lon):
     tzone=pytz.timezone(zone)
     return tzone
 
-def get_locname_fromlatlon(lat,lon):
-    geolocator = Nominatim(user_agent="nearby_search")
-    #locname=geolocator.reverse((lat, lon))[0].split(',')[0].replace(' ','_')
-    locdic=geolocator.reverse((lat, lon)).raw['address']
-    if 'city' in locdic.keys():
-        locname=locdic['city']
-    else:
-        locname=locdic['county']  
+# def get_locname_fromlatlon(lat,lon):
+#     geolocator = Nominatim(user_agent="nearby_search")
+#     #locname=geolocator.reverse((lat, lon))[0].split(',')[0].replace(' ','_')
+#     locdic=geolocator.reverse((lat, lon)).raw['address']
+#     if 'city' in locdic.keys():
+#         locname=locdic['city']
+#     else:
+#         locname=locdic['county']  
 
-    locname=locname.replace(' ','_')
-    return locname      
+#     locname=locname.replace(' ','_')
+#     return locname      
 
 
 
@@ -193,8 +193,16 @@ def wind_power_byWF(Wind,df_WF):
     Power.attrs['WFname']=df_WF.p_name[0] 
     return Power
 
-def  WT_USstate(uswt_db,state):
-    df_state=uswt_db[uswt_db.t_state==state]
+def  WT_USagg(uswt_db,type,territory):
+    '''
+    Create an aggregate of all wind farm in a given state or a given energy market,
+    Unfortunately an energy market does not cover  a set of states
+    '''
+    if type=='state':
+        df=uswt_db[uswt_db['t_state']==territory]
+
+    if type=='market':
+        df=uswt_db[uswt_db['Market']==territory]    
 
     #power by state can be seen  at https://windexchange.energy.gov/maps-data/321
     #uwstdb acronym here https://energy.usgs.gov/uswtdb/api-doc/
@@ -204,35 +212,36 @@ def  WT_USstate(uswt_db,state):
             'p_name':'unique',
             'eia_id':'count'
             }
-    Df_state=df_state.groupby(['eia_id']).agg(agg_dic)
-    Df_state['count']=Df_state.pop('eia_id')
+    Df=df.groupby(['eia_id']).agg(agg_dic)
+    Df['count']=Df.pop('eia_id')
 
-    #total power
-    tot=(Df_state['t_cap']*Df_state['count']).sum()/1e6
-    print('total power in ' + state + ' is ' + '{:2.2f}'.format(tot)+'MW')
+    #total power in MW
+    tot=(Df['t_cap']*Df['count']).sum()/1e6
+    print('total power is ' + '{:2.2f}'.format(tot)+'MW')
 
     location=[]
-    for i in range(len(Df_state)):
-        lat=Df_state.iloc[i]['ylat']
-        lon=Df_state.iloc[i]['xlong']
-        locname=Df_state.iloc[i]['p_name'][0]
-        if i==0:#time zone is the same for all the stat so do it once only
+    for i in range(len(Df)):
+        lat=Df.iloc[i]['ylat']
+        lon=Df.iloc[i]['xlong']
+        locname=Df.iloc[i]['p_name'][0]
+        if i==0:#consider here that time zone is the same for all the location so do it once only
             tzone=get_tzone(lat,lon)
         loc=([lat,lon,locname,tzone])
         location.append(loc)
 
-    return Df_state,location      
+    return Df,location      
 
 ###########################Ensemble analysis########################
 ####################################################################
 
 #Some analysis
 def confidence_interval(df,perc):
-    #confidence interval using student t test
-    #confidence is standard error (or meaasurement precision) * tvalue
-    #se= np.std(a)/np.sqrt(len(a)-1) #standard error
-    #tvalue=2.093 #for 95% and dof=19 ; see https://www.scribbr.com/statistics/students-t-table/
-    #
+    '''
+    confidence interval using student t test
+    confidence is standard error (or meaasurement precision) * tvalue
+    se= np.std(a)/np.sqrt(len(a)-1) #standard error
+    tvalue=2.093 #for 95% and dof=19 ; see https://www.scribbr.com/statistics/students-t-table/
+    '''
     CI_low=[]
     CI_up=[]
     for i in range(df.shape[0]):#along ligns as each lign is a date
@@ -248,12 +257,12 @@ def gaussian_density(Df,n=None):
     if n==None:
         n=20
     minval=np.min(Df.min())
-    maxval=np.max(Df.max())
+    maxval=np.max(Df.max())*1.05
     eval_vec=np.linspace(minval,maxval,n)
     Proba=[]
     for i in range(len(Df)):
         kde=stat.gaussian_kde(Df.iloc[i]).evaluate(eval_vec)
-        Proba.append(kde/sum(kde))#sum (All probailities at a given time) =1
+        Proba.append(kde/sum(kde))#sum (All probabilities at a given time) =1
     Proba=np.transpose(Proba)
     return Proba, eval_vec
 
@@ -308,9 +317,9 @@ def fig4prod(aForecast,location,var_code):
     ax.fill_between(Mydf.index,df_CI[0],df_CI[1],alpha=0.2)
     ax.legend([p0,p2[0]],
             ['mean ensemble', '95% confidence interval'])
-    ax.set_title('time serie for ' +var_code + ' at '+locname)
+    ax.set_title('time serie for ' +var_code + ' - '+locname)
     ax.set_xlabel('time')
-    ax.set_ylabel(name +'('+units+')')
+    ax.set_ylabel(name +' ('+units+')')
     fig.tight_layout()
     #fig.show()
     fig.savefig('results/prod/'+locname+'_Timeserie_'+var_code+'.jpg',bbox_inches='tight')
@@ -320,13 +329,45 @@ def fig4prod(aForecast,location,var_code):
     sns.boxplot(Mydf.T)
     ax.set_xticks(np.arange(0, Mydf.shape[0], step=1), labels=timelabel)
     ax.tick_params(axis='x', labelrotation=45)
-    ax.set_title('boxplot for '+var_code + ' at '+ locname)
+    ax.set_title('boxplot for '+var_code + ' - '+ locname)
     ax.set_xlabel('time')
-    ax.set_ylabel(name +'('+units+')')
+    ax.set_ylabel(name +' ('+units+')')
     fig.tight_layout()
     fig.savefig('results/prod/'+locname+'_Boxplot_'+var_code+'.jpg',bbox_inches='tight')
 
 
+    Proba,eval_vec=gaussian_density(Mydf,n=None)
+    # put values as closest index in eval_vec
+    #needed to get probality heatmap + values plot together
+    z=[]
+    for i in range(Mydf.shape[0]):
+        idx=np.abs(eval_vec-Mydf.median(axis=1).iloc[i]).argmin()
+        z.append(idx+.5)#.+5 to center on middle of the cell
+
+
+    ylabel=['{:0.0f}'.format(n) for n in eval_vec][::2]
+    #ca cest pas pire
+    fig,ax=plt.subplots(figsize=(8,4))
+    sns.heatmap(Proba*100,cmap='magma',cbar_kws={'label':'Probability (%)'}) #niveau de proba en niveau de gris??
+    sns.lineplot(x=np.arange(0+0.5, Proba.shape[1]+0.5, step=1),y=z,color='white',lw=4)
+    ax.set_xticks(np.arange(0+0.5, Proba.shape[1]+0.5, step=1), labels=timelabel)
+    ax.set_yticks(np.arange(0+.5, len(eval_vec)+.5, step=2), labels=ylabel)
+    ax.set_xlabel('time')
+    ax.set_ylabel(name +' ('+units+')')
+    #ax.yaxis.set_inverted(True)
+    ax.invert_yaxis()
+    #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%0.2f'))
+    ax.tick_params(axis='x', labelrotation=45)
+
+    ax.set_title(var_code +  ' daily distribution'+' - '+ locname) 
+                 #' at (' + str(location[0])+'N' +', '+ str(location[1])+'E)')
+
+    fig.savefig('results/prod/'+locname+'_Probaheatmap_'+var_code+'.jpg',bbox_inches='tight')
+
+
+
+##########################################################################################
+#################################tests figures############################################
 def fig4test(aForecast,location,var_code):
 
     Mydf=pd.DataFrame(aForecast.variable.values)
