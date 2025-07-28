@@ -3,10 +3,10 @@ A nice introduction to USA energy market can be found here [USmarket101](https:/
 
 In the USA, some of the energy market are deregularized market, meaning that prices are not controlled by the governement, but mainly depend on the need-offer balance. Goal is to generate competition to lower prices across the deregulated area. Indeed, in many areas, a customer can choose an electric supplier instead of purchasing electricity from governmental utilities. This indroduced a retail market for electricity. On one hand, retail prices can help customer to find lower prices or to buy energy from clean energy sources only. On the other hand, customer choosing independant companies are often attached by contract for years while prices are much more volatile than in the regulated market.  
 
-A visual of main energy markets (also called 'Regional Transmission Organizations' aka RTO) can be vizualized in the following picture (taken from the aformentionned website). As one can see, RTO's area is not a state or a set of states. For example, North California is not in California ISO, and PJM interconnection is present in less than 20% of North Carolina.
+A visual of main energy markets (also called 'Regional Transmission Organizations' aka RTO) can be vizualized in the following picture (taken from the aformentionned website). As one can see, RTO's area is not a state or a set of states. For example, North California is not in California ISO, and PJM interconnection is present in less than 20% of North Carolina. Some informations can also be found [here](https://www.ferc.gov/electric-power-markets).
 
 <p align="center">
- <img width="800" src=main_energy_market.pnj>
+ <img width="800" src=main_energy_market.png>
  </p>
 
 In deregulated markets, companies produces energy and buy/loan energy to sell it to customers. So, in those markets, energy is auctionned on a day to day basis. Transactions can be done on real-time market or on the day ahead market. 
