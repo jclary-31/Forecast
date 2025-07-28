@@ -7,12 +7,16 @@ A visual of main energy markets (also called 'Regional Transmission Organization
 
 <p align="center">
  <img width="800" src=main_energy_market.png>
- </p>
+</p>
 
 In deregulated markets, companies produces energy and buy/loan energy to sell it to customers. So, in those markets, energy is auctionned on a day to day basis. Transactions can be done on real-time market or on the day ahead market. 
 The day ahead market represent 90+% of the energy transactions. As a consequence, any company and any trader operating in those market needs to have an estimation of day ahead production capacities. Most, if not all, of today day-ahaed forecasts come from a deterministic model, meaning that a given forecast is 'absolute' in the sense that it have no error and no randomness. However, markets are by nature complex, irregular, and always sensitive to unexpected events. By nature, deterministic forecast will fail time to time. Not knowing how and when is a major issue for shareholders.
 
 [ERCOT example](https://www.ercot.com/gridmktinfo/dashboards/combinedwindandsolar)
+
+<p align="center">
+ <img width="800" src=Ercotexample_officialprediction.png>
+ </p>
 
 # Ensemble forecast
 A deterministic model will give a statement as 'tomorrow temperature in New York at 12h will be 30 Celsius'. But is this statement correct? and how much of this statement is true?. Maybe temperature will be 28 Celsius because of a local small cold front coming from the sea,  or maybe it will 34 Celsius because of unexpected low winds and because of local urban heat effects. So, the statement in more an indication than a true prediction. The missing information in the statement is the probability of the prediction, in other words what confidence can I give to the statement. 
